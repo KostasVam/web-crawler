@@ -1,5 +1,23 @@
 # Roadmap
 
+## Assignment Requirements Coverage
+
+| Requirement | Phase | How |
+|---|---|---|
+| Fetch content of URLs | Phase 1 | Worker loop: HTTP GET → HTML |
+| Discover new URLs from content | Phase 1 | cheerio extracts `<a href>` links |
+| Crawl discovered URLs | Phase 1 | BFS queue loop |
+| Seed with `ipfabric.io` | Phase 1 | Configurable seed URL |
+| State assumptions & limitations | README | Assumptions & Limitations table |
+| Evaluate weaknesses | README + ADRs | Each ADR has "Consequences → Negative" |
+| Future improvements | Phase 3-5 | Robustness, observability, advanced scaling |
+| Scale on large grid of machines | Phase 2 + 5 | Redis coordination + sharding + Bloom filters |
+| Run on multiple nodes | Phase 2 | Redis-backed queue + visited set |
+| Complete scan guarantee | Phase 2 | Atomic SADD = each URL visited exactly once |
+| Horizontal scalability focus | Phase 2 + 5 | Stateless workers, consistent hashing |
+
+---
+
 ## Phase 1: Single-Node Crawler (MVP)
 Get a working crawler that runs on one machine with in-memory state.
 

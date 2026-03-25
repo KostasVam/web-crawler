@@ -80,6 +80,51 @@ A TypeScript web crawler that performs BFS traversal starting from a seed URL. I
 - **No duplicate work** — `SADD` is atomic; if two workers discover the same URL, only one enqueues it
 - **Automatic load balancing** — `BRPOP` distributes URLs to whichever worker is free
 
+### Completeness Guarantee
+
+The distributed crawler produces the **same result** as a single-node crawler. Here's why:
+
+1. **Every discovered URL enters the queue exactly once** — before enqueuing, we do `SADD visited <url>`. Redis returns `1` (new) or `0` (duplicate). Only new URLs are enqueued. This is atomic — even if 10 workers discover the same URL simultaneously, exactly one `SADD` returns `1`.
+
+2. **Every queued URL is processed exactly once** — `BRPOP` removes the URL from the queue and delivers it to exactly one worker. No two workers receive the same URL.
+
+3. **No URLs are lost** — the queue is persistent in Redis. If a URL is enqueued, it stays until a worker picks it up.
+
+The combination guarantees: every reachable URL from the seed is visited exactly once, regardless of how many workers are running.
+
+### Scaling to a Large Grid of Machines
+
+```
+Small scale (1-10 nodes):
+  All workers → single Redis instance
+  Redis handles ~100K ops/sec — sufficient for thousands of pages/sec
+
+Medium scale (10-100 nodes):
+  All workers → Redis Sentinel (high availability)
+  Add read replicas for SISMEMBER checks
+  Workers grouped by region to reduce latency
+
+Large scale (100+ nodes):
+  ┌──────────┐  ┌──────────┐  ┌──────────┐
+  │ Redis    │  │ Redis    │  │ Redis    │
+  │ Shard A  │  │ Shard B  │  │ Shard C  │
+  │ *.a-m.com│  │ *.n-s.com│  │ *.t-z.com│
+  └────┬─────┘  └────┬─────┘  └────┬─────┘
+       │             │             │
+   Workers A     Workers B     Workers C
+```
+
+At large scale, a single Redis becomes the bottleneck. Solutions:
+
+| Challenge | Solution |
+|---|---|
+| Redis memory limit | **Bloom filter** — visited set uses constant memory (~1GB for 1 billion URLs) instead of growing linearly |
+| Redis throughput limit | **Consistent hashing** — partition URLs by domain across Redis shards. Same domain always maps to same shard |
+| DNS resolution overhead | **Local DNS cache** per worker — avoids repeated lookups for same domain |
+| Network bandwidth per node | **Domain-aware partitioning** — workers specialize in domain subsets, improving TCP connection reuse |
+| Worker crash recovery | **Reliable queue** (BRPOPLPUSH) — URLs being processed are tracked; if worker dies, URLs return to queue |
+| Duplicate content at different URLs | **Content fingerprinting** — SHA-256 hash of page body, skip if already seen |
+
 ## Assumptions & Limitations
 
 | Assumption / Limitation | Impact |
