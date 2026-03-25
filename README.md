@@ -6,21 +6,6 @@
 
 Distributed web crawler in TypeScript — Redis-backed URL frontier, horizontal scalability, BFS traversal.
 
-## Assignment
-
-> **IP Fabric — Programming Test (Part 1)**
->
-> Write a program that crawls webpages. A crawler at its core downloads URLs, discovers new URLs in the downloaded content, and schedules download of new discovered URLs.
->
-> - Fetch the content of a discovered URL
-> - Discover any new URLs by extracting them from the fetched content
-> - Crawl any new URLs
-> - Seed the crawler with `https://ipfabric.io/` as the start URL
->
-> State your assumptions and limitations. Evaluate the weaknesses of this solution. Suggestions for future improvements is a plus. How it might be scaled to run on a large grid of machines.
->
-> **Please design a solution that can run on multiple nodes, ensures a complete scan (when compared to single node/thread solution). Focus on horizontal scalability.**
-
 ## Overview
 
 A TypeScript web crawler that performs BFS traversal starting from a seed URL. It extracts links from HTML content and schedules them for crawling, while avoiding duplicate visits. Designed for horizontal scalability using Redis as a shared coordination layer between worker nodes.
