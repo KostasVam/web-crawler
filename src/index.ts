@@ -1,1 +1,52 @@
-console.log('Happy developing ✨')
+import { parseArgs } from "./config";
+import { Frontier } from "./crawler/frontier";
+import { VisitedStore } from "./crawler/visited";
+import { crawl } from "./crawler/worker";
+import { MemoryFrontier } from "./backends/memory/memoryFrontier";
+import { MemoryVisited } from "./backends/memory/memoryVisited";
+
+async function main() {
+  const config = parseArgs();
+
+  console.log("=== Web Crawler ===");
+  console.log(`Seed:        ${config.seed}`);
+  console.log(`Max depth:   ${config.maxDepth}`);
+  console.log(`Concurrency: ${config.concurrency}`);
+  console.log(`Mode:        ${config.mode}`);
+  console.log();
+
+  let frontier: Frontier;
+  let visited: VisitedStore;
+
+  if (config.mode === "redis") {
+    const { RedisFrontier } = await import("./backends/redis/redisFrontier");
+    const { RedisVisited } = await import("./backends/redis/redisVisited");
+    frontier = new RedisFrontier(config.redisUrl);
+    visited = new RedisVisited(config.redisUrl);
+  } else {
+    frontier = new MemoryFrontier();
+    visited = new MemoryVisited();
+  }
+
+  const result = await crawl(config, frontier, visited);
+
+  console.log();
+  console.log("=== Summary ===");
+  console.log(`Domain:       ${result.seedDomain}`);
+  console.log(`Pages crawled: ${result.crawled}`);
+  console.log(`Errors:        ${result.errors}`);
+  console.log(`URLs visited:  ${await visited.size()}`);
+
+  // Clean up Redis connections if applicable
+  if (config.mode === "redis") {
+    const f = frontier as any;
+    const v = visited as any;
+    if (typeof f.close === "function") await f.close();
+    if (typeof v.close === "function") await v.close();
+  }
+}
+
+main().catch((err) => {
+  console.error("Fatal:", err);
+  process.exit(1);
+});
