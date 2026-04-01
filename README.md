@@ -180,8 +180,17 @@ web-crawler/
 | [ADR-002](docs/adr/ADR-002-redis-as-shared-state.md) | Use Redis as shared state store (atomic ops, blocking queue) |
 | [ADR-003](docs/adr/ADR-003-bfs-crawl-strategy.md) | BFS crawl strategy (important pages first, parallelizable) |
 | [ADR-004](docs/adr/ADR-004-url-normalization.md) | URL normalization before deduplication |
-| [ADR-005](docs/adr/ADR-005-concurrency-model.md) | Async concurrency within each worker (p-limit) |
+| [ADR-005](docs/adr/ADR-005-concurrency-model.md) | Async concurrency within each worker (inline limiter) |
 | [ADR-006](docs/adr/ADR-006-domain-scoping.md) | Restrict crawling to seed domain |
+
+### Execution Examples
+
+See [docs/execution-examples.md](docs/execution-examples.md) for real crawl outputs against `ipfabric.io`, including:
+
+- Single-node runs at depth 0, 1, and 2
+- Memory vs Redis backend comparison
+- Multi-worker runs (2 and 3 workers) with zero-duplicate verification
+- Stress test: 3 workers, depth 5, 777 URLs discovered
 
 ## Getting Started
 
