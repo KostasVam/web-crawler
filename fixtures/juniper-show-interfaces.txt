@@ -1,0 +1,249 @@
+
+// a part of command output from device
+const text = `
+Physical interface: ge-0/0/0, Enabled, Physical link is Up
+  Interface index: 138, SNMP ifIndex: 506, Generation: 141
+  Description: STATIC1R16
+  Link-level type: Ethernet, MTU: 1514, Link-mode: Full-duplex, Speed: 1000mbps, BPDU Error: None, MAC-REWRITE Error: None, Loopback: Disabled, Source filtering: Disabled, Flow control: Enabled,
+  Auto-negotiation: Enabled, Remote fault: Online
+  Device flags   : Present Running
+  Interface flags: SNMP-Traps Internal: 0x4000
+  Link flags     : None
+  CoS queues     : 8 supported, 8 maximum usable queues
+  Hold-times     : Up 0 ms, Down 0 ms
+  Current address: 50:00:00:26:00:00, Hardware address: 50:00:00:26:00:00
+  Last flapped   : 2018-10-12 07:55:25 UTC (1w6d 00:29 ago)
+  Statistics last cleared: Never
+  Traffic statistics:
+   Input  bytes  :             79748352                  248 bps
+   Output bytes  :            215993949                 1320 bps
+   Input  packets:              1115931                    0 pps
+   Output packets:              1591473                    0 pps
+  Label-switched interface (LSI) traffic statistics:
+   Input  bytes  :                    0                    0 bps
+   Input  packets:                    0                    0 pps
+  Input errors:
+    Errors: 0, Drops: 0, Framing errors: 0, Runts: 0, Policed discards: 0, L3 incompletes: 0, L2 channel errors: 0, L2 mismatch timeouts: 0, FIFO errors: 0, Resource errors: 0
+  Output errors:
+    Carrier transitions: 1, Errors: 0, Drops: 0, Collisions: 0, Aged packets: 0, FIFO errors: 0, HS link CRC errors: 0, MTU errors: 0, Resource errors: 0
+  Egress queues: 8 supported, 4 in use
+  Queue counters:       Queued packets  Transmitted packets      Dropped packets
+    0 best-effort               310886               310886                    0
+    1 expedited-fo                   0                    0                    0
+    2 assured-forw                   0                    0                    0
+    3 network-cont             1280588              1280588                    0
+  Queue number:         Mapped forwarding classes
+    0                   best-effort 
+    1                   expedited-forwarding
+    2                   assured-forwarding
+    3                   network-control
+  Active alarms  : None
+  Active defects : None
+  Interface transmit statistics: Disabled
+
+  Logical interface ge-0/0/0.0 (Index 73) (SNMP ifIndex 509) (Generation 138)
+    Flags: SNMP-Traps 0x4000 Encapsulation: ENET2
+    Traffic statistics:
+     Input  bytes  :             79748727
+     Output bytes  :            160678589
+     Input  packets:              1115935
+     Output packets:              1591473
+    Local statistics:
+     Input  bytes  :             69656698
+     Output bytes  :            150343645
+     Input  packets:               951675
+     Output packets:              1424433
+    Transit statistics:
+     Input  bytes  :             10092029                    0 bps
+     Output bytes  :             10334944                    0 bps
+     Input  packets:               164260                    0 pps
+     Output packets:               167040                    0 pps
+    Security: Zone: Null
+    Flow Statistics :  
+    Flow Input statistics :
+      Self packets :                     0
+      ICMP packets :                     0
+      VPN packets :                      0
+      Multicast packets :                0
+      Bytes permitted by policy :        0
+      Connections established :          0 
+    Flow Output statistics: 
+      Multicast packets :                0
+      Bytes permitted by policy :        0 
+    Flow error statistics (Packets dropped due to): 
+      Address spoofing:                  0
+      Authentication failed:             0
+      Incoming NAT errors:               0
+      Invalid zone received packet:      0
+      Multiple user authentications:     0 
+      Multiple incoming NAT:             0
+      No parent for a gate:              0
+      No one interested in self packets: 0       
+      No minor session:                  0 
+      No more sessions:                  0
+      No NAT gate:                       0 
+      No route present:                  0 
+      No SA for incoming SPI:            0 
+      No tunnel found:                   0
+      No session for a gate:             0 
+      No zone or NULL zone binding       0
+      Policy denied:                     0
+      Security association not active:   0 
+      TCP sequence number out of window: 0
+      Syn-attack protection:             0
+      User authentication errors:        0
+    Protocol inet, MTU: 1500, Generation: 156, Route table: 0
+      Flags: Sendbcast-pkt-to-re
+      Addresses, Flags: Is-Preferred Is-Primary
+        Destination: 10.241.80.0/31, Local: 10.241.80.1, Broadcast: Unspecified, Generation: 150
+    Protocol iso, MTU: 1497, Generation: 157, Route table: 0
+      Flags: None
+    Protocol mpls, MTU: 1488, Maximum labels: 3, Generation: 158, Route table: 0
+
+Physical interface: ae0, Enabled, Physical link is Up
+  Interface index: 128, SNMP ifIndex: 526, Generation: 131
+  Link-level type: Ethernet, MTU: 1514, Speed: 2Gbps, BPDU Error: None, MAC-REWRITE Error: None, Loopback: Disabled, Source filtering: Disabled, Flow control: Disabled, Minimum links needed: 1,
+  Minimum bandwidth needed: 0
+  Device flags   : Present Running
+  Interface flags: SNMP-Traps Internal: 0x4000
+  Current address: 4c:96:14:10:01:00, Hardware address: 4c:96:14:10:01:00
+  Last flapped   : 2018-10-12 08:05:45 UTC (1w6d 00:19 ago)
+  Statistics last cleared: Never
+  Traffic statistics:
+   Input  bytes  :            594864555                 3400 bps
+   Output bytes  :            451212986                 3056 bps
+   Input  packets:              4483538                    2 pps
+   Output packets:              4037657                    2 pps
+  Label-switched interface (LSI) traffic statistics:
+   Input  bytes  :                    0                    0 bps
+   Input  packets:                    0                    0 pps
+  Input errors:
+    Errors: 0, Drops: 0, Framing errors: 0, Runts: 0, Giants: 0, Policed discards: 0, Resource errors: 0
+  Output errors:
+    Carrier transitions: 0, Errors: 0, Drops: 0, MTU errors: 0, Resource errors: 0
+  Ingress queues: 8 supported, 4 in use
+  Queue counters:       Queued packets  Transmitted packets      Dropped packets
+    0 best-effort                    0                    0                    0
+    1 expedited-fo                   0                    0                    0
+    2 assured-forw                   0                    0                    0
+    3 network-cont                   0                    0                    0
+  Egress queues: 8 supported, 4 in use
+  Queue counters:       Queued packets  Transmitted packets      Dropped packets
+    0 best-effort               901688               901688                    0
+    1 expedited-fo                   0                    0                    0
+    2 assured-forw                   0                    0                    0
+    3 network-cont             3135969              3135969                    0
+  Queue number:         Mapped forwarding classes
+    0                   best-effort 
+    1                   expedited-forwarding
+    2                   assured-forwarding
+    3                   network-control
+
+  Logical interface ae0.0 (Index 72) (SNMP ifIndex 531) (Generation 137)
+    Description: STATIC1R18
+    Flags: SNMP-Traps 0x4000 Encapsulation: ENET2
+    Statistics        Packets        pps         Bytes          bps
+    Bundle:
+        Input :       2247311          2     317572407         1432
+        Output:       1719136          0     123546352          296
+    Link:
+      ge-0/0/2.0
+        Input :       1941883          2     261994581         1432
+        Output:       1307917          0     105769420          296
+      ge-0/0/3.0
+        Input :        305428          0      55577826            0
+        Output:        492285          0      33827706            0
+    LACP info:        Role     System             System      Port    Port  Port 
+                             priority          identifier  priority  number   key 
+      ge-0/0/2.0     Actor        127  4c:96:14:10:01:00       127       1     1
+      ge-0/0/2.0   Partner        127  4c:96:14:10:01:00       127       1     2
+      ge-0/0/3.0     Actor        127  4c:96:14:10:01:00       127       2     1
+      ge-0/0/3.0   Partner        127  4c:96:14:10:01:00       127       2     2
+    LACP Statistics:       LACP Rx     LACP Tx   Unknown Rx   Illegal Rx 
+      ge-0/0/2.0           1118113     1118727            0            0
+      ge-0/0/3.0           1118114     1118728            0            0
+    Marker Statistics:   Marker Rx     Resp Tx   Unknown Rx   Illegal Rx
+      ge-0/0/2.0                 0           0            0            0
+      ge-0/0/3.0                 0           0            0            0
+    Security: Zone: Null
+    Flow Statistics :  
+    Flow Input statistics :
+      Self packets :                     0
+      ICMP packets :                     0
+      VPN packets :                      0
+      Multicast packets :                0
+      Bytes permitted by policy :        0
+      Connections established :          0 
+    Flow Output statistics: 
+      Multicast packets :                0
+      Bytes permitted by policy :        0 
+    Flow error statistics (Packets dropped due to): 
+      Address spoofing:                  0
+      Authentication failed:             0
+      Incoming NAT errors:               0
+      Invalid zone received packet:      0
+      Multiple user authentications:     0 
+      Multiple incoming NAT:             0
+      No parent for a gate:              0
+      No one interested in self packets: 0       
+      No minor session:                  0 
+      No more sessions:                  0
+      No NAT gate:                       0 
+      No route present:                  0 
+      No SA for incoming SPI:            0 
+      No tunnel found:                   0
+      No session for a gate:             0 
+      No zone or NULL zone binding       0
+      Policy denied:                     0
+      Security association not active:   0 
+      TCP sequence number out of window: 0
+      Syn-attack protection:             0
+      User authentication errors:        0
+    Protocol inet, MTU: 1500, Generation: 153, Route table: 0
+      Flags: Sendbcast-pkt-to-re, Is-Primary
+      Addresses, Flags: Is-Preferred Is-Primary
+        Destination: 10.241.80.32/29, Local: 10.241.80.33, Broadcast: 10.241.80.39, Generation: 148
+    Protocol iso, MTU: 1497, Generation: 154, Route table: 0
+      Flags: Is-Primary
+    Protocol mpls, MTU: 1488, Maximum labels: 3, Generation: 155, Route table: 0
+      Flags: Is-Primary
+`;
+
+// expected result
+const parseResult = [
+  {
+    name: 'ge-0/0/0',
+    state: {admin: 'enabled', link: 'up'},
+    dscr: 'STATIC1R16',
+    speed: 1000000000,
+    duplex: 'full',
+    mac: '5000.0026.0000',
+    logicalInterfaceList: [
+      {
+        name: 'ge-0/0/0.0',
+        protocolList: [
+          {type: 'inet'},
+          {type: 'iso'},
+          {type: 'mpls'},
+        ],
+      },
+    ],
+  },
+  {
+    name: 'ae0',
+    state: {admin: 'enabled', link: 'up'},
+    speed: 2000000000,
+    mac: '4c96.1410.0100',
+    logicalInterfaceList: [
+      {
+        name: 'ae0.0',
+        dscr: 'STATIC1R18',
+        protocolList: [
+          {type: 'inet'},
+          {type: 'iso'},
+          {type: 'mpls'},
+        ],
+      },
+    ],
+  },
+];
