@@ -7,7 +7,7 @@ Accepted
 We have horizontal scaling (multiple workers/machines), but each individual worker also needs to be efficient. A worker that fetches one page at a time wastes most of its time waiting for HTTP responses.
 
 ## Decision
-Each worker runs **multiple concurrent fetches** using Node.js `async/await` and a concurrency limiter (p-limit).
+Each worker runs **multiple concurrent fetches** using Node.js `async/await` and an inline concurrency limiter.
 
 ```
 Worker Process
@@ -27,11 +27,11 @@ Node.js has a **single thread** but an **event loop** that handles I/O asynchron
 
 This is like a restaurant waiter: one waiter (thread) serves multiple tables (requests) by not standing idle while the kitchen prepares food.
 
-### `p-limit` library
-Controls how many concurrent operations run at once:
+### Concurrency limiter
+We use an inline concurrency limiter (`src/crawler/limiter.ts`) equivalent to the `p-limit` npm package, avoiding ESM/CJS compatibility issues with p-limit v4+:
 
 ```typescript
-import pLimit from 'p-limit';
+import { pLimit } from './limiter';
 const limit = pLimit(5);  // max 5 concurrent fetches
 
 // These all start, but only 5 run at a time
