@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import { parseArgs } from "./config";
 import { Frontier } from "./crawler/frontier";
 import { VisitedStore } from "./crawler/visited";
@@ -36,6 +37,11 @@ async function main() {
   console.log(`Pages crawled: ${result.crawled}`);
   console.log(`Errors:        ${result.errors}`);
   console.log(`URLs visited:  ${await visited.size()}`);
+
+  if (config.output) {
+    fs.writeFileSync(config.output, JSON.stringify(result.pages, null, 2));
+    console.log(`Output:        ${config.output} (${result.pages.length} records)`);
+  }
 
   // Clean up Redis connections if applicable
   if (config.mode === "redis") {

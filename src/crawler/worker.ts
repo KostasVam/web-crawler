@@ -2,6 +2,7 @@ import { Config } from "../config";
 import { Frontier, FrontierItem } from "./frontier";
 import { VisitedStore } from "./visited";
 import { extractLinks } from "./extractor";
+import * as cheerio from "cheerio";
 
 // Inline concurrency limiter (avoids p-limit ESM/CJS issue)
 function pLimit(concurrency: number) {
@@ -27,14 +28,24 @@ function pLimit(concurrency: number) {
     });
 }
 
+export interface PageRecord {
+  url: string;
+  depth: number;
+  status: number;
+  title: string;
+  links: string[];
+}
+
 export interface CrawlResult {
   crawled: number;
   errors: number;
   seedDomain: string;
+  pages: PageRecord[];
 }
 
 interface FetchResult {
   html: string;
+  status: number;
   skipped: boolean;
 }
 
@@ -51,16 +62,16 @@ async function fetchPage(
 
   if (!response.ok) {
     console.warn(`  HTTP ${response.status} — skipped`);
-    return { html: "", skipped: true };
+    return { html: "", status: response.status, skipped: true };
   }
 
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("text/html")) {
-    return { html: "", skipped: true };
+    return { html: "", status: response.status, skipped: true };
   }
 
   const html = await response.text();
-  return { html, skipped: false };
+  return { html, status: response.status, skipped: false };
 }
 
 /** Enqueue newly discovered links that haven't been visited yet. */
@@ -89,6 +100,7 @@ export async function crawl(
   let crawled = 0;
   let errors = 0;
   let stopping = false;
+  const pages: PageRecord[] = [];
 
   const seedDomain = new URL(config.seed).hostname.replace(/^www\./, "");
 
@@ -118,10 +130,24 @@ export async function crawl(
 
       crawled++;
 
-      if (item.depth >= config.maxDepth) return;
+      const $ = cheerio.load(result.html);
+      const title = $("title").first().text().trim();
 
-      const links = extractLinks(result.html, item.url, seedDomain);
-      await enqueueNewLinks(links, item.depth + 1, frontier, visited, () => stopping);
+      const links = item.depth < config.maxDepth
+        ? extractLinks(result.html, item.url, seedDomain)
+        : [];
+
+      pages.push({
+        url: item.url,
+        depth: item.depth,
+        status: result.status,
+        title,
+        links,
+      });
+
+      if (links.length > 0) {
+        await enqueueNewLinks(links, item.depth + 1, frontier, visited, () => stopping);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`  Error: ${msg}`);
@@ -167,5 +193,5 @@ export async function crawl(
   process.off("SIGINT", onSignal);
   process.off("SIGTERM", onSignal);
 
-  return { crawled, errors, seedDomain };
+  return { crawled, errors, seedDomain, pages };
 }

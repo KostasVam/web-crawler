@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
+    "parse": "node dist/parse.js",
     "test": "jest"
   },
   "dependencies": {

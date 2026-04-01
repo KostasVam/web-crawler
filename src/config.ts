@@ -5,6 +5,7 @@ export interface Config {
   mode: "memory" | "redis";
   redisUrl: string;
   requestTimeout: number;
+  output: string;
 }
 
 const defaults: Config = {
@@ -14,6 +15,7 @@ const defaults: Config = {
   mode: "memory",
   redisUrl: "redis://localhost:6379",
   requestTimeout: 10_000,
+  output: "",
 };
 
 export function parseArgs(argv: string[] = process.argv.slice(2)): Config {
@@ -46,6 +48,10 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): Config {
         break;
       case "--timeout":
         config.requestTimeout = parseInt(next, 10);
+        i++;
+        break;
+      case "--output":
+        config.output = next;
         i++;
         break;
       default:
