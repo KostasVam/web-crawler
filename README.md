@@ -25,7 +25,7 @@ A TypeScript web crawler that performs BFS traversal starting from a seed URL. I
 
 ```
                     ┌─────────────┐
-                    │    Redis     │
+                    │    Redis    │
                     │  ┌────────┐ │
                     │  │ Queue  │ │  ← URLs to visit (LPUSH/BRPOP)
                     │  │Visited │ │  ← URLs already seen (SADD/SISMEMBER)
