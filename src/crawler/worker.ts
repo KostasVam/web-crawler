@@ -33,6 +33,53 @@ export interface CrawlResult {
   seedDomain: string;
 }
 
+interface FetchResult {
+  html: string;
+  skipped: boolean;
+}
+
+/** Fetch a single URL. Returns HTML body, or {skipped: true} for non-HTML/errors. */
+async function fetchPage(
+  url: string,
+  timeoutMs: number,
+): Promise<FetchResult> {
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(timeoutMs),
+    redirect: "follow",
+    headers: { "User-Agent": "IPFabric-Crawler/1.0" },
+  });
+
+  if (!response.ok) {
+    console.warn(`  HTTP ${response.status} — skipped`);
+    return { html: "", skipped: true };
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("text/html")) {
+    return { html: "", skipped: true };
+  }
+
+  const html = await response.text();
+  return { html, skipped: false };
+}
+
+/** Enqueue newly discovered links that haven't been visited yet. */
+async function enqueueNewLinks(
+  links: string[],
+  depth: number,
+  frontier: Frontier,
+  visited: VisitedStore,
+  isStopping: () => boolean,
+): Promise<void> {
+  for (const link of links) {
+    if (isStopping()) break;
+    const added = await visited.add(link);
+    if (added) {
+      await frontier.enqueue({ url: link, depth });
+    }
+  }
+}
+
 export async function crawl(
   config: Config,
   frontier: Frontier,
@@ -43,7 +90,6 @@ export async function crawl(
   let errors = 0;
   let stopping = false;
 
-  // Determine seed domain from the final URL after redirects
   const seedDomain = new URL(config.seed).hostname.replace(/^www\./, "");
 
   // Enqueue seed
@@ -66,37 +112,16 @@ export async function crawl(
     console.log(`[depth=${item.depth}] ${item.url}`);
 
     try {
-      const response = await fetch(item.url, {
-        signal: AbortSignal.timeout(config.requestTimeout),
-        redirect: "follow",
-        headers: { "User-Agent": "IPFabric-Crawler/1.0" },
-      });
+      const result = await fetchPage(item.url, config.requestTimeout);
 
-      if (!response.ok) {
-        console.warn(`  HTTP ${response.status} — skipped`);
-        errors++;
-        return;
-      }
-
-      const contentType = response.headers.get("content-type") ?? "";
-      if (!contentType.includes("text/html")) {
-        return;
-      }
+      if (result.skipped) return;
 
       crawled++;
-      const html = await response.text();
 
       if (item.depth >= config.maxDepth) return;
 
-      const links = extractLinks(html, item.url, seedDomain);
-
-      for (const link of links) {
-        if (stopping) break;
-        const added = await visited.add(link);
-        if (added) {
-          await frontier.enqueue({ url: link, depth: item.depth + 1 });
-        }
-      }
+      const links = extractLinks(result.html, item.url, seedDomain);
+      await enqueueNewLinks(links, item.depth + 1, frontier, visited, () => stopping);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`  Error: ${msg}`);
@@ -105,7 +130,7 @@ export async function crawl(
   }
 
   // Main crawl loop
-  const inFlight: Promise<void>[] = [];
+  const inFlight: Set<Promise<void>> = new Set();
   let emptyPolls = 0;
   const maxEmptyPolls = config.mode === "redis" ? 3 : 1;
 
@@ -113,32 +138,30 @@ export async function crawl(
     const item = await frontier.dequeue();
 
     if (!item) {
+      // Queue is empty, but tasks in flight may enqueue new URLs.
+      // Wait for them to finish before deciding we're done.
+      if (inFlight.size > 0) {
+        await Promise.race(inFlight);
+        continue;
+      }
+
       emptyPolls++;
       if (emptyPolls >= maxEmptyPolls) break;
-      // Wait a bit for distributed workers to enqueue more items
       await new Promise((r) => setTimeout(r, 2000));
       continue;
     }
 
     emptyPolls = 0;
     const task = limit(() => processItem(item));
-    inFlight.push(task);
+    const tracked = task.finally(() => inFlight.delete(tracked));
+    inFlight.add(tracked);
 
-    // Prevent unbounded memory growth
-    if (inFlight.length >= config.concurrency * 2) {
+    // Back-pressure: if too many in flight, wait for one to finish
+    if (inFlight.size >= config.concurrency * 2) {
       await Promise.race(inFlight);
-      // Remove settled promises
-      for (let i = inFlight.length - 1; i >= 0; i--) {
-        const settled = await Promise.race([
-          inFlight[i].then(() => true),
-          Promise.resolve(false),
-        ]);
-        if (settled) inFlight.splice(i, 1);
-      }
     }
   }
 
-  // Wait for remaining in-flight tasks
   await Promise.allSettled(inFlight);
 
   process.off("SIGINT", onSignal);
