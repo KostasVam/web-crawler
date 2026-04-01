@@ -8,10 +8,9 @@ yarn-error.log*
 /.pnp
 .pnp.js
 
-.vscode/*
+.vscode/
 .idea/
 .DS_Store
 dist/
-.claude/
 *.json.tmp
 results.json
