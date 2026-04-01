@@ -145,6 +145,7 @@ web-crawler/
 │   │   ├── worker.ts             ← main crawl loop + retry logic
 │   │   ├── extractor.ts          ← HTML → URLs (cheerio)
 │   │   ├── normalizer.ts         ← URL normalization
+│   │   ├── limiter.ts            ← concurrency limiter (inline p-limit)
 │   │   ├── frontier.ts           ← queue interface
 │   │   ├── visited.ts            ← visited set interface
 │   │   ├── normalizer.test.ts    ← URL normalization tests
@@ -157,6 +158,8 @@ web-crawler/
 │       ├── interfaces.ts         ← PhysicalInterface, LogicalInterface types
 │       ├── parseInterfaces.ts    ← Juniper "show interfaces" parser
 │       └── parseInterfaces.test.ts ← parser tests against sample data
+├── fixtures/
+│   └── juniper-show-interfaces.txt ← sample device output for parser
 ├── docs/
 │   ├── adr/                      ← Architecture Decision Records
 │   ├── execution-examples.md     ← Real crawl outputs and benchmarks

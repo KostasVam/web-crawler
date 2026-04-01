@@ -47,13 +47,8 @@ async function main() {
     console.log(`Output:        ${config.output} (${result.pages.length} records)`);
   }
 
-  // Clean up Redis connections if applicable
-  if (config.mode === "redis") {
-    const f = frontier as any;
-    const v = visited as any;
-    if (typeof f.close === "function") await f.close();
-    if (typeof v.close === "function") await v.close();
-  }
+  await frontier.close?.();
+  await visited.close?.();
 }
 
 main().catch((err) => {

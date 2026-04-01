@@ -1,4 +1,4 @@
-import { PhysicalInterface, LogicalInterface } from "./interfaces";
+import { LogicalInterface, PhysicalInterface } from "./interfaces";
 
 /**
  * Parse Juniper "show interfaces" output into structured data.

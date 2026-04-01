@@ -1,32 +1,9 @@
+import * as cheerio from "cheerio";
 import { Config } from "../config";
 import { Frontier, FrontierItem } from "./frontier";
 import { VisitedStore } from "./visited";
 import { extractLinks } from "./extractor";
-import * as cheerio from "cheerio";
-
-// Inline concurrency limiter (avoids p-limit ESM/CJS issue)
-function pLimit(concurrency: number) {
-  let active = 0;
-  const queue: (() => void)[] = [];
-
-  function next() {
-    if (queue.length > 0 && active < concurrency) {
-      active++;
-      queue.shift()!();
-    }
-  }
-
-  return <T>(fn: () => Promise<T>): Promise<T> =>
-    new Promise<T>((resolve, reject) => {
-      queue.push(() => {
-        fn().then(resolve, reject).finally(() => {
-          active--;
-          next();
-        });
-      });
-      next();
-    });
-}
+import { pLimit } from "./limiter";
 
 export interface PageRecord {
   url: string;

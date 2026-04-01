@@ -7,4 +7,5 @@ export interface Frontier {
   enqueue(item: FrontierItem): Promise<void>;
   dequeue(): Promise<FrontierItem | null>;
   size(): Promise<number>;
+  close?(): Promise<void>;
 }

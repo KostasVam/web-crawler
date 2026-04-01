@@ -3,4 +3,5 @@ export interface VisitedStore {
   add(url: string): Promise<boolean>;
   has(url: string): Promise<boolean>;
   size(): Promise<number>;
+  close?(): Promise<void>;
 }
