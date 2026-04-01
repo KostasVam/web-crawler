@@ -194,23 +194,128 @@ $ docker exec crawler-redis redis-cli LLEN crawler:frontier
 3. The frontier queue is empty (all work consumed), and the visited set contains all 65 discovered URLs.
 4. In Redis mode, the worker uses `BRPOP` with a 2-second timeout and exits after 3 consecutive empty polls (6 seconds idle), allowing distributed termination without a coordinator.
 
-### Why this matters for scaling
+---
 
-In Redis mode, you can launch additional workers that connect to the same Redis:
+## Example 5: Multi-Worker — 2 Workers Sharing Redis at Depth 1
+
+Two workers launched simultaneously against the same Redis, proving horizontal scaling with zero duplicate work.
 
 ```bash
-# Terminal 1:
-$ node dist/index.js --mode redis --max-depth 2
+$ docker exec crawler-redis redis-cli FLUSHDB
+OK
 
-# Terminal 2 (same or different machine):
-$ node dist/index.js --mode redis --max-depth 2
+# Terminal 1:
+$ node dist/index.js --mode redis --max-depth 1 --concurrency 2 --output worker1.json
+
+# Terminal 2 (simultaneously):
+$ node dist/index.js --mode redis --max-depth 1 --concurrency 2 --output worker2.json
 ```
 
-Both workers pull from the same queue and share the same visited set. `SADD` is atomic — if both workers discover the same URL simultaneously, only one succeeds in enqueuing it. No coordination protocol needed.
+**Worker 1 output:**
+
+```
+=== Web Crawler ===
+Seed:        https://ipfabric.io
+Max depth:   1
+Concurrency: 2
+Mode:        redis
+
+[depth=0] https://ipfabric.io
+[depth=1] https://ipfabric.io/how-does-it-work
+[depth=1] https://ipfabric.io/what-is-network-assurance
+[depth=1] https://ipfabric.io/integrations
+[depth=1] https://ipfabric.io/careers
+[depth=1] https://ipfabric.io/pricing
+...                                          (28 pages total)
+
+=== Summary ===
+Domain:       ipfabric.io
+Pages crawled: 28
+Errors:        0
+URLs visited:  65
+Duration:      23.9s (1.2 pages/sec)
+Output:        worker1.json (28 records)
+```
+
+**Worker 2 output:**
+
+```
+=== Web Crawler ===
+Seed:        https://ipfabric.io
+Max depth:   1
+Concurrency: 2
+Mode:        redis
+
+[depth=1] https://ipfabric.io/de-risk-digital-transformation-with-reliable-automation
+[depth=1] https://ipfabric.io/drive-operational-efficiency-with-end-to-end-insights
+[depth=1] https://ipfabric.io/company/contact
+[depth=1] https://ipfabric.io/blog
+[depth=1] https://ipfabric.io/press-center
+...                                          (23 pages total)
+
+=== Summary ===
+Domain:       ipfabric.io
+Pages crawled: 23
+Errors:        0
+URLs visited:  65
+Duration:      23.9s (1.0 pages/sec)
+Output:        worker2.json (23 records)
+```
+
+**Verification — zero overlap:**
+
+```
+Worker 1 pages: 28
+Worker 2 pages: 23
+Total:          51
+Overlap:        0
+Duplicates:     NONE
+```
+
+**What happened:**
+
+1. Worker 1 started first, picked up the seed URL via `BRPOP`, and began enqueuing depth-1 links.
+2. Worker 2 started immediately after. The seed was already in the visited set (`SADD` returned 0), so it skipped straight to consuming depth-1 URLs from the queue.
+3. `BRPOP` distributed URLs between workers automatically — whichever worker was free got the next URL.
+4. **Zero duplicates** — `SADD` is atomic. When both workers discovered the same link simultaneously, only one `SADD` returned `1` (new), so it was enqueued exactly once.
+5. Work was split roughly 55/45 — not perfectly even because some pages take longer to fetch than others, and the WAF started blocking later requests.
 
 ---
 
-## Example 5: Backend Comparison — Memory vs Redis at Depth 2
+## Example 6: Multi-Worker — 2 Workers at Depth 2
+
+Same setup as Example 5, but with two levels of link discovery. Much larger URL space — tests that deduplication holds under heavier load.
+
+```bash
+$ docker exec crawler-redis redis-cli FLUSHDB
+OK
+
+# Terminal 1:
+$ node dist/index.js --mode redis --max-depth 2 --concurrency 2 --output worker1.json
+
+# Terminal 2 (simultaneously):
+$ node dist/index.js --mode redis --max-depth 2 --concurrency 2 --output worker2.json
+```
+
+**Results:**
+
+| | Worker 1 | Worker 2 | Total |
+|---|---|---|---|
+| Pages crawled | 24 | 29 | **53** |
+| Duration | 31.2s | 31.2s | 31.2s |
+| URLs discovered | — | — | **780** |
+| Overlap | — | — | **0** |
+
+```bash
+$ docker exec crawler-redis redis-cli SCARD crawler:visited
+(integer) 780
+```
+
+**Key finding:** Even with 780 URLs and 2 workers racing to discover and enqueue links, **zero duplicates**. The atomic `SADD` guarantee holds under real concurrent load, not just in theory.
+
+---
+
+## Example 7: Backend Comparison — Memory vs Redis at Depth 2
 
 Both backends crawled with identical parameters (`--max-depth 2 --concurrency 3`) to compare correctness and performance.
 
@@ -234,15 +339,16 @@ Both backends crawled with identical parameters (`--max-depth 2 --concurrency 3`
 
 ## Observations Across All Runs
 
-| Metric | Depth 0 | Depth 1 | Depth 2 (Memory) | Depth 2 (Redis) |
-|---|---|---|---|---|
-| Pages crawled | 1 | 52 | 50 | 51 |
-| URLs discovered | 1 | 65 | 780 | 780 |
-| Duration | 0.5s | ~20s | 21.1s | 32.8s |
-| Throughput | 1.9 p/s | ~2.5 p/s | 2.4 p/s | 1.6 p/s |
-| HTTP 403 (WAF) | 0 | ~11 | ~730 | ~730 |
+| Metric | Depth 0 | Depth 1 (Memory) | Depth 1 (2 Workers) | Depth 2 (Memory) | Depth 2 (Redis) | Depth 2 (2 Workers) |
+|---|---|---|---|---|---|---|
+| Pages crawled | 1 | 52 | 28 + 23 = 51 | 50 | 51 | 24 + 29 = 53 |
+| URLs discovered | 1 | 65 | 65 | 780 | 780 | 780 |
+| Duration | 0.5s | ~20s | 23.9s | 21.1s | 32.8s | 31.2s |
+| Throughput | 1.9 p/s | ~2.5 p/s | 2.1 p/s combined | 2.4 p/s | 1.6 p/s | 1.7 p/s combined |
+| Duplicates | — | — | **0** | — | — | **0** |
 
 - **URL growth is exponential with depth** — depth 1 found 65 URLs, depth 2 found 780. This demonstrates why `maxDepth` is essential as a safety net.
 - **WAF rate limiting becomes dominant at depth 2** — the site's CDN (Cloudflare) starts returning 403 after ~50-60 rapid requests. A production crawler would respect `robots.txt` crawl-delay and add per-domain rate limiting.
 - **Memory and Redis modes produce equivalent results** — the pluggable backend design means the crawl logic is identical regardless of storage backend.
+- **Multi-worker mode distributes work with zero duplication** — atomic `SADD` + `BRPOP` guarantee each URL is crawled exactly once, regardless of the number of workers.
 - **Single-worker throughput is network-bound, not backend-bound** — the ~2.4 pages/sec rate is limited by HTTP latency to ipfabric.io, not by queue operations.

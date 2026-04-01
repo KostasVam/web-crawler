@@ -119,14 +119,14 @@ At large scale, a single Redis becomes the bottleneck. Solutions:
 | No politeness delay | Could overwhelm the target server under high concurrency |
 | Redis is single point of failure | If Redis goes down, all workers stop |
 | Visited set grows unboundedly in memory | For very large sites, Redis memory could be exhausted |
-| No retry on failed fetches | Transient network errors cause pages to be skipped |
+| Retry is limited (2 attempts) | Persistent failures are skipped after 2 retries with backoff |
 | Domain-scoped only | External links are discovered but not followed |
 
 ## Future Improvements
 
 See [docs/roadmap.md](docs/roadmap.md) for the full phased plan. Key improvements:
 
-- **Reliability**: Retry with exponential backoff, reliable queue pattern (BRPOPLPUSH)
+- **Reliability**: Reliable queue pattern (BRPOPLPUSH) for crash recovery
 - **Politeness**: `robots.txt` parsing, per-domain rate limiting, crawl delay
 - **Memory**: Bloom filter for visited set (constant memory vs linear growth)
 - **Scale**: Consistent hashing for URL partitioning across Redis shards
@@ -138,22 +138,31 @@ See [docs/roadmap.md](docs/roadmap.md) for the full phased plan. Key improvement
 ```
 web-crawler/
 ├── src/
-│   ├── index.ts                  ← entry point
+│   ├── index.ts                  ← crawler entry point
+│   ├── parse.ts                  ← parser entry point (Juniper CLI output)
+│   ├── config.ts                 ← CLI argument parsing
 │   ├── crawler/
-│   │   ├── worker.ts             ← main crawl loop
-│   │   ├── extractor.ts          ← HTML → URLs
+│   │   ├── worker.ts             ← main crawl loop + retry logic
+│   │   ├── extractor.ts          ← HTML → URLs (cheerio)
 │   │   ├── normalizer.ts         ← URL normalization
 │   │   ├── frontier.ts           ← queue interface
-│   │   └── visited.ts            ← visited set interface
+│   │   ├── visited.ts            ← visited set interface
+│   │   ├── normalizer.test.ts    ← URL normalization tests
+│   │   ├── extractor.test.ts     ← link extraction tests
+│   │   └── crawler.integration.test.ts ← end-to-end crawl tests
 │   ├── backends/
-│   │   ├── memory/               ← in-memory implementations (single node)
-│   │   └── redis/                ← Redis implementations (distributed)
-│   └── config.ts                 ← configuration
+│   │   ├── memory/               ← in-memory (single node)
+│   │   └── redis/                ← Redis (distributed)
+│   └── parser/
+│       ├── interfaces.ts         ← PhysicalInterface, LogicalInterface types
+│       ├── parseInterfaces.ts    ← Juniper "show interfaces" parser
+│       └── parseInterfaces.test.ts ← parser tests against sample data
 ├── docs/
 │   ├── adr/                      ← Architecture Decision Records
-│   ├── learning-resources.md     ← Curated study material
+│   ├── execution-examples.md     ← Real crawl outputs and benchmarks
 │   └── roadmap.md                ← Phased implementation plan
 ├── docker-compose.yml
+├── jest.config.ts
 ├── package.json
 └── tsconfig.json
 ```
@@ -175,24 +184,56 @@ web-crawler/
 
 ### Prerequisites
 - Node.js 18+
-- Docker (for Redis)
+- Docker (for Redis mode)
 
-### Run
+### Install & Build
 ```bash
-# Start Redis
-docker compose up -d
-
-# Install dependencies
 npm install
-
-# Build
 npm run build
+```
 
-# Run crawler
-node dist/index.js
+### Run the Crawler
 
-# Run in single-node mode (no Redis needed)
-node dist/index.js --mode memory
+```bash
+# Single-node mode (no Redis needed)
+node dist/index.js --max-depth 2
+
+# With JSON output
+node dist/index.js --max-depth 1 --output results.json
+
+# Distributed mode with Redis
+docker compose up -d
+node dist/index.js --mode redis --max-depth 2
+
+# Multiple workers (run in separate terminals)
+node dist/index.js --mode redis --max-depth 2 --output worker1.json
+node dist/index.js --mode redis --max-depth 2 --output worker2.json
+```
+
+### CLI Options
+
+| Option | Default | Description |
+|---|---|---|
+| `--seed <url>` | `https://ipfabric.io` | Starting URL |
+| `--max-depth <n>` | `2` | Maximum link-following depth |
+| `--concurrency <n>` | `5` | Parallel HTTP requests per worker |
+| `--mode <memory\|redis>` | `memory` | Backend for queue and visited set |
+| `--redis-url <url>` | `redis://localhost:6379` | Redis connection string |
+| `--output <file>` | _(none)_ | Write results as JSON |
+| `--timeout <ms>` | `10000` | HTTP request timeout |
+
+### Run the Parser
+
+Parses Juniper `show interfaces` CLI output into structured JSON:
+
+```bash
+node dist/parse.js device-output.txt
+```
+
+### Run Tests
+
+```bash
+npm test     # 39 tests: unit + integration
 ```
 
 ## Design Principles
