@@ -38,6 +38,10 @@ async function main() {
   console.log(`Errors:        ${result.errors}`);
   console.log(`URLs visited:  ${await visited.size()}`);
 
+  const secs = (result.durationMs / 1000).toFixed(1);
+  const pagesPerSec = result.crawled > 0 ? (result.crawled / (result.durationMs / 1000)).toFixed(1) : "0";
+  console.log(`Duration:      ${secs}s (${pagesPerSec} pages/sec)`);
+
   if (config.output) {
     fs.writeFileSync(config.output, JSON.stringify(result.pages, null, 2));
     console.log(`Output:        ${config.output} (${result.pages.length} records)`);

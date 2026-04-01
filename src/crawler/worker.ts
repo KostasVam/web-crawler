@@ -41,6 +41,7 @@ export interface CrawlResult {
   errors: number;
   seedDomain: string;
   pages: PageRecord[];
+  durationMs: number;
 }
 
 interface FetchResult {
@@ -49,29 +50,59 @@ interface FetchResult {
   skipped: boolean;
 }
 
-/** Fetch a single URL. Returns HTML body, or {skipped: true} for non-HTML/errors. */
+const MAX_RETRIES = 2;
+const RETRY_DELAYS = [500, 1500]; // ms — exponential-ish backoff
+
+/** Fetch a single URL with retry on transient errors. */
 async function fetchPage(
   url: string,
   timeoutMs: number,
 ): Promise<FetchResult> {
-  const response = await fetch(url, {
-    signal: AbortSignal.timeout(timeoutMs),
-    redirect: "follow",
-    headers: { "User-Agent": "IPFabric-Crawler/1.0" },
-  });
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(timeoutMs),
+        redirect: "follow",
+        headers: { "User-Agent": "IPFabric-Crawler/1.0" },
+      });
 
-  if (!response.ok) {
-    console.warn(`  HTTP ${response.status} — skipped`);
-    return { html: "", status: response.status, skipped: true };
+      // Don't retry client errors (4xx) — they won't change
+      if (response.status >= 400 && response.status < 500) {
+        console.warn(`  HTTP ${response.status} — skipped`);
+        return { html: "", status: response.status, skipped: true };
+      }
+
+      // Retry server errors (5xx)
+      if (!response.ok) {
+        if (attempt < MAX_RETRIES) {
+          console.warn(`  HTTP ${response.status} — retry ${attempt + 1}/${MAX_RETRIES}`);
+          await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
+          continue;
+        }
+        console.warn(`  HTTP ${response.status} — skipped after ${MAX_RETRIES} retries`);
+        return { html: "", status: response.status, skipped: true };
+      }
+
+      const contentType = response.headers.get("content-type") ?? "";
+      if (!contentType.includes("text/html")) {
+        return { html: "", status: response.status, skipped: true };
+      }
+
+      const html = await response.text();
+      return { html, status: response.status, skipped: false };
+    } catch (err) {
+      // Retry on network/timeout errors
+      if (attempt < MAX_RETRIES) {
+        console.warn(`  ${err instanceof Error ? err.message : err} — retry ${attempt + 1}/${MAX_RETRIES}`);
+        await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
+        continue;
+      }
+      throw err;
+    }
   }
 
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.includes("text/html")) {
-    return { html: "", status: response.status, skipped: true };
-  }
-
-  const html = await response.text();
-  return { html, status: response.status, skipped: false };
+  // Unreachable, but TypeScript needs it
+  return { html: "", status: 0, skipped: true };
 }
 
 /** Enqueue newly discovered links that haven't been visited yet. */
@@ -96,6 +127,7 @@ export async function crawl(
   frontier: Frontier,
   visited: VisitedStore,
 ): Promise<CrawlResult> {
+  const startTime = Date.now();
   const limit = pLimit(config.concurrency);
   let crawled = 0;
   let errors = 0;
@@ -193,5 +225,6 @@ export async function crawl(
   process.off("SIGINT", onSignal);
   process.off("SIGTERM", onSignal);
 
-  return { crawled, errors, seedDomain, pages };
+  const durationMs = Date.now() - startTime;
+  return { crawled, errors, seedDomain, pages, durationMs };
 }
