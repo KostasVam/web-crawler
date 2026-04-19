@@ -19,7 +19,7 @@ import { VisitedStore } from "../../crawler/visited";
 export class MemoryVisited implements VisitedStore {
   // Set<string>: a collection of unique strings. No duplicates allowed.
   // Java equivalent: HashSet<String>
-  // .has() = O(1), .add() = O(1), .size = O(1)
+  // .add() = O(1), .size = O(1)
   private set = new Set<string>();
 
   // Returns true if the URL is NEW (not in the set before).
@@ -33,10 +33,6 @@ export class MemoryVisited implements VisitedStore {
     if (this.set.has(url)) return false;  // Already seen
     this.set.add(url);                    // Mark as seen
     return true;                          // Was newly added
-  }
-
-  async has(url: string): Promise<boolean> {
-    return this.set.has(url);
   }
 
   async size(): Promise<number> {

@@ -56,14 +56,6 @@ export class RedisVisited implements VisitedStore {
     return added === 1;
   }
 
-  // has(): check if a URL is in the visited set WITHOUT adding it.
-  // SISMEMBER = Set Is Member. Returns 1 if present, 0 if not.
-  // Used less often than add() — mainly for debugging.
-  // Java: jedis.sismember(SET_KEY, url)
-  async has(url: string): Promise<boolean> {
-    return (await this.redis.sismember(SET_KEY, url)) === 1;
-  }
-
   // size(): how many URLs have been visited.
   // SCARD = Set Cardinality (fancy word for "count of elements").
   // Java: jedis.scard(SET_KEY)

@@ -22,10 +22,6 @@ export interface VisitedStore {
   /** Returns true if the URL was newly added (not seen before). */
   add(url: string): Promise<boolean>;
 
-  // Check if a URL was already visited, WITHOUT adding it.
-  // Used less often than add() — mostly for debugging/inspection.
-  has(url: string): Promise<boolean>;
-
   // How many URLs have been visited so far. Used for the summary at the end.
   size(): Promise<number>;
 
