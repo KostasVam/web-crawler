@@ -35,9 +35,9 @@ Use **Redis** as the shared state store for:
 - `SISMEMBER visited <url>` — check if URL was already visited (used for filtering before enqueue)
 
 ### Why these are race-condition safe:
-Imagine Worker A and Worker B both discover `https://ipfabric.io/about` at the same time:
-1. Worker A: `SADD visited https://ipfabric.io/about` → Redis returns `1` (new!)
-2. Worker B: `SADD visited https://ipfabric.io/about` → Redis returns `0` (already there!)
+Imagine Worker A and Worker B both discover `https://example.com/about` at the same time:
+1. Worker A: `SADD visited https://example.com/about` → Redis returns `1` (new!)
+2. Worker B: `SADD visited https://example.com/about` → Redis returns `0` (already there!)
 3. Only Worker A enqueues it. No duplicate work.
 
 This works because Redis processes commands **sequentially** (single-threaded command execution).

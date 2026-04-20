@@ -40,7 +40,7 @@ async function fetchPage(
       const response = await fetch(url, {
         signal: AbortSignal.timeout(timeoutMs),
         redirect: "follow",
-        headers: { "User-Agent": "IPFabric-Crawler/1.0" },
+        headers: { "User-Agent": "WebCrawler/1.0" },
       });
 
       // Don't retry client errors (4xx) — they won't change

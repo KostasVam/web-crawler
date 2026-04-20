@@ -7,7 +7,7 @@
 | Fetch content of URLs | Phase 1 | Done | Worker loop: HTTP GET → HTML |
 | Discover new URLs from content | Phase 1 | Done | cheerio extracts `<a href>` links |
 | Crawl discovered URLs | Phase 1 | Done | BFS queue loop |
-| Seed with `ipfabric.io` | Phase 1 | Done | Configurable seed URL |
+| Seed with `example.com` | Phase 1 | Done | Configurable seed URL |
 | State assumptions & limitations | README | Done | Assumptions & Limitations table |
 | Evaluate weaknesses | README + ADRs | Done | Each ADR has "Consequences → Negative" |
 | Future improvements | Phase 3-5 | Done | Robustness, observability, advanced scaling |

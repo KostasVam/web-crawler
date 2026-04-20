@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-We need to choose a language/runtime for the crawler. The assignment prefers JavaScript/TypeScript/Node.js. Python is also acceptable but TypeScript offers better type safety and is closer to the team's stack at IP Fabric.
+We need to choose a language/runtime for the crawler. JavaScript/TypeScript/Node.js is a natural fit for an I/O-bound workload, and TypeScript offers better type safety than plain JavaScript for a project of this size.
 
 ## Decision
 Use **TypeScript** on **Node.js** runtime.
@@ -21,5 +21,5 @@ Use **TypeScript** on **Node.js** runtime.
 - TypeScript adds a compilation step (`tsc`), slightly more complex than plain JS.
 
 ### Alternatives Considered
-- **Python**: Popular in networking, has `asyncio` + `aiohttp`, but IP Fabric prefers JS/TS.
+- **Python**: Popular in networking, has `asyncio` + `aiohttp`, but JS/TS is the preferred stack here.
 - **Go**: Excellent concurrency model with goroutines, but not in the preferred stack.

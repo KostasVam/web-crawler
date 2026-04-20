@@ -185,7 +185,7 @@ web-crawler/
 
 ### Execution Examples
 
-See [docs/execution-examples.md](docs/execution-examples.md) for real crawl outputs against `ipfabric.io`, including:
+See [docs/execution-examples.md](docs/execution-examples.md) for real crawl outputs against `example.com`, including:
 
 - Single-node runs at depth 0, 1, and 2
 - Memory vs Redis backend comparison
@@ -226,7 +226,7 @@ node dist/index.js --mode redis --max-depth 2 --output worker2.json
 
 | Option | Default | Description |
 |---|---|---|
-| `--seed <url>` | `https://ipfabric.io` | Starting URL |
+| `--seed <url>` | `https://example.com` | Starting URL |
 | `--max-depth <n>` | `2` | Maximum link-following depth |
 | `--concurrency <n>` | `5` | Parallel HTTP requests per worker |
 | `--mode <memory\|redis>` | `memory` | Backend for queue and visited set |

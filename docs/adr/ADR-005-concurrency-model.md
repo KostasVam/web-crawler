@@ -11,11 +11,11 @@ Each worker runs **multiple concurrent fetches** using Node.js `async/await` and
 
 ```
 Worker Process
-├── Fetch slot 1: downloading ipfabric.io/about     (waiting for response...)
-├── Fetch slot 2: downloading ipfabric.io/blog      (waiting for response...)
-├── Fetch slot 3: downloading ipfabric.io/products   (parsing HTML...)
+├── Fetch slot 1: downloading example.com/about     (waiting for response...)
+├── Fetch slot 2: downloading example.com/blog      (waiting for response...)
+├── Fetch slot 3: downloading example.com/products   (parsing HTML...)
 ├── Fetch slot 4: idle (queue empty, waiting on BRPOP...)
-└── Fetch slot 5: downloading ipfabric.io/careers    (waiting for response...)
+└── Fetch slot 5: downloading example.com/careers    (waiting for response...)
 ```
 
 ### How this works in Node.js

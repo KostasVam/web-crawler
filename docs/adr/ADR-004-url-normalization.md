@@ -7,11 +7,11 @@ Accepted
 The same page can be referenced by many different URL strings:
 
 ```
-https://ipfabric.io/about
-https://ipfabric.io/about/
-https://ipfabric.io/about#team
-https://ipfabric.io/about?utm_source=google
-https://IPFABRIC.IO/about
+https://example.com/about
+https://example.com/about/
+https://example.com/about#team
+https://example.com/about?utm_source=google
+https://EXAMPLE.COM/about
 ```
 
 If we don't normalize these, the visited set treats each as unique — we'd crawl the same page 5 times.
@@ -20,11 +20,11 @@ If we don't normalize these, the visited set treats each as unique — we'd craw
 Normalize all URLs before adding to the visited set or frontier:
 
 1. **Parse** with `new URL()` (Node.js built-in)
-2. **Lowercase** the hostname (`IPFABRIC.IO` → `ipfabric.io`)
+2. **Lowercase** the hostname (`EXAMPLE.COM` → `example.com`)
 3. **Remove fragment** (`#team` → removed, fragments are client-side only)
 4. **Remove trailing slash** (`/about/` → `/about`, except for root `/`)
 5. **Remove tracking params** (`utm_source`, `utm_medium`, etc.)
-6. **Resolve relative URLs** (`/about` on `https://ipfabric.io/blog` → `https://ipfabric.io/about`)
+6. **Resolve relative URLs** (`/about` on `https://example.com/blog` → `https://example.com/about`)
 
 ## Consequences
 

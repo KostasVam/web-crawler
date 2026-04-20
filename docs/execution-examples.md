@@ -1,6 +1,6 @@
 # Execution Examples
 
-Real crawl runs against `ipfabric.io` demonstrating different configurations.
+Real crawl runs against `example.com` demonstrating different configurations.
 
 ---
 
@@ -14,15 +14,15 @@ $ node dist/index.js --max-depth 0
 
 ```
 === Web Crawler ===
-Seed:        https://ipfabric.io
+Seed:        https://example.com
 Max depth:   0
 Concurrency: 5
 Mode:        memory
 
-[depth=0] https://ipfabric.io
+[depth=0] https://example.com
 
 === Summary ===
-Domain:       ipfabric.io
+Domain:       example.com
 Pages crawled: 1
 Errors:        0
 URLs visited:  1
@@ -42,23 +42,23 @@ $ node dist/index.js --max-depth 1 --concurrency 3
 
 ```
 === Web Crawler ===
-Seed:        https://ipfabric.io
+Seed:        https://example.com
 Max depth:   1
 Concurrency: 3
 Mode:        memory
 
-[depth=0] https://ipfabric.io
-[depth=1] https://ipfabric.io/how-does-it-work
-[depth=1] https://ipfabric.io/what-is-network-assurance
-[depth=1] https://ipfabric.io/integrations
-[depth=1] https://ipfabric.io/blog
-[depth=1] https://ipfabric.io/careers
+[depth=0] https://example.com
+[depth=1] https://example.com/how-does-it-work
+[depth=1] https://example.com/what-is-network-assurance
+[depth=1] https://example.com/integrations
+[depth=1] https://example.com/blog
+[depth=1] https://example.com/careers
 ...                                          (64 depth-1 URLs)
-[depth=1] https://ipfabric.io/reporting-unlawful-conduct
+[depth=1] https://example.com/reporting-unlawful-conduct
   HTTP 403 — skipped
 
 === Summary ===
-Domain:       ipfabric.io
+Domain:       example.com
 Pages crawled: 52
 Errors:        0
 URLs visited:  65
@@ -86,25 +86,25 @@ $ node dist/index.js --max-depth 2 --concurrency 3 --output crawl-depth2.json
 
 ```
 === Web Crawler ===
-Seed:        https://ipfabric.io
+Seed:        https://example.com
 Max depth:   2
 Concurrency: 3
 Mode:        memory
 
-[depth=0] https://ipfabric.io
-[depth=1] https://ipfabric.io/how-does-it-work
-[depth=1] https://ipfabric.io/what-is-network-assurance
+[depth=0] https://example.com
+[depth=1] https://example.com/how-does-it-work
+[depth=1] https://example.com/what-is-network-assurance
 ...                                          (64 depth-1 URLs)
-[depth=2] https://ipfabric.io/blog/talk-to-your-network-data-with-chatbot
-[depth=2] https://ipfabric.io/blog/api-programmability-part-1
-[depth=2] https://ipfabric.io/releases/release_notes/7.10
+[depth=2] https://example.com/blog/talk-to-your-network-data-with-chatbot
+[depth=2] https://example.com/blog/api-programmability-part-1
+[depth=2] https://example.com/releases/release_notes/7.10
   HTTP 403 — skipped
-[depth=2] https://ipfabric.io/support/known_issues/Vendors/cisco
+[depth=2] https://example.com/support/known_issues/Vendors/cisco
   HTTP 403 — skipped
 ...                                          (715 depth-2 URLs)
 
 === Summary ===
-Domain:       ipfabric.io
+Domain:       example.com
 Pages crawled: 50
 Errors:        0
 URLs visited:  780
@@ -124,21 +124,21 @@ Output:        crawl-depth2.json (50 records)
 ```json
 [
   {
-    "url": "https://ipfabric.io",
+    "url": "https://example.com",
     "depth": 0,
     "status": 200,
-    "title": "IP Fabric: Build a Network Digital Twin",
+    "title": "Example Domain",
     "links": [
-      "https://ipfabric.io/how-does-it-work",
-      "https://ipfabric.io/what-is-network-assurance",
+      "https://example.com/how-does-it-work",
+      "https://example.com/what-is-network-assurance",
       "..."
     ]
   },
   {
-    "url": "https://ipfabric.io/how-does-it-work",
+    "url": "https://example.com/how-does-it-work",
     "depth": 1,
     "status": 200,
-    "title": "How Does It Work | IP Fabric",
+    "title": "How Does It Work | Example",
     "links": ["..."]
   }
 ]
@@ -159,19 +159,19 @@ $ node dist/index.js --mode redis --max-depth 1 --concurrency 3 --output crawl-r
 
 ```
 === Web Crawler ===
-Seed:        https://ipfabric.io
+Seed:        https://example.com
 Max depth:   1
 Concurrency: 3
 Mode:        redis
 
-[depth=0] https://ipfabric.io
-[depth=1] https://ipfabric.io/how-does-it-work
-[depth=1] https://ipfabric.io/what-is-network-assurance
+[depth=0] https://example.com
+[depth=1] https://example.com/how-does-it-work
+[depth=1] https://example.com/what-is-network-assurance
 ...                                          (64 depth-1 URLs)
   HTTP 403 — skipped
 
 === Summary ===
-Domain:       ipfabric.io
+Domain:       example.com
 Pages crawled: 51
 Errors:        0
 URLs visited:  65
@@ -215,21 +215,21 @@ $ node dist/index.js --mode redis --max-depth 1 --concurrency 2 --output worker2
 
 ```
 === Web Crawler ===
-Seed:        https://ipfabric.io
+Seed:        https://example.com
 Max depth:   1
 Concurrency: 2
 Mode:        redis
 
-[depth=0] https://ipfabric.io
-[depth=1] https://ipfabric.io/how-does-it-work
-[depth=1] https://ipfabric.io/what-is-network-assurance
-[depth=1] https://ipfabric.io/integrations
-[depth=1] https://ipfabric.io/careers
-[depth=1] https://ipfabric.io/pricing
+[depth=0] https://example.com
+[depth=1] https://example.com/how-does-it-work
+[depth=1] https://example.com/what-is-network-assurance
+[depth=1] https://example.com/integrations
+[depth=1] https://example.com/careers
+[depth=1] https://example.com/pricing
 ...                                          (28 pages total)
 
 === Summary ===
-Domain:       ipfabric.io
+Domain:       example.com
 Pages crawled: 28
 Errors:        0
 URLs visited:  65
@@ -241,20 +241,20 @@ Output:        worker1.json (28 records)
 
 ```
 === Web Crawler ===
-Seed:        https://ipfabric.io
+Seed:        https://example.com
 Max depth:   1
 Concurrency: 2
 Mode:        redis
 
-[depth=1] https://ipfabric.io/de-risk-digital-transformation-with-reliable-automation
-[depth=1] https://ipfabric.io/drive-operational-efficiency-with-end-to-end-insights
-[depth=1] https://ipfabric.io/company/contact
-[depth=1] https://ipfabric.io/blog
-[depth=1] https://ipfabric.io/press-center
+[depth=1] https://example.com/de-risk-digital-transformation-with-reliable-automation
+[depth=1] https://example.com/drive-operational-efficiency-with-end-to-end-insights
+[depth=1] https://example.com/company/contact
+[depth=1] https://example.com/blog
+[depth=1] https://example.com/press-center
 ...                                          (23 pages total)
 
 === Summary ===
-Domain:       ipfabric.io
+Domain:       example.com
 Pages crawled: 23
 Errors:        0
 URLs visited:  65
@@ -376,7 +376,7 @@ $ docker exec crawler-redis redis-cli SCARD crawler:visited
 1. **Zero duplicates across 3 workers** — atomic `SADD` holds even with 3 concurrent writers.
 2. **Work evenly distributed** (17/15/18) — `BRPOP` naturally load-balances across workers without any coordination logic.
 3. **All workers terminated simultaneously** (25.3s) — distributed termination via `BRPOP` timeout works correctly. When the queue empties and no new URLs are discovered, all workers exit within seconds of each other.
-4. **Depth 5 found no URLs beyond depth 1** — ipfabric.io's WAF blocks aggressive crawling with HTTP 403 at depth 2+. The crawler handled this gracefully: 777 URLs discovered, 50 HTML pages successfully crawled, zero crashes.
+4. **Depth 5 found no URLs beyond depth 1** — example.com's WAF blocks aggressive crawling with HTTP 403 at depth 2+. The crawler handled this gracefully: 777 URLs discovered, 50 HTML pages successfully crawled, zero crashes.
 5. **No errors** — retry logic and content-type filtering handled all edge cases silently.
 
 ---
@@ -395,4 +395,4 @@ $ docker exec crawler-redis redis-cli SCARD crawler:visited
 - **WAF rate limiting becomes dominant at depth 2** — the site's CDN (Cloudflare) starts returning 403 after ~50-60 rapid requests. A production crawler would respect `robots.txt` crawl-delay and add per-domain rate limiting.
 - **Memory and Redis modes produce equivalent results** — the pluggable backend design means the crawl logic is identical regardless of storage backend.
 - **Multi-worker mode distributes work with zero duplication** — atomic `SADD` + `BRPOP` guarantee each URL is crawled exactly once, regardless of the number of workers.
-- **Single-worker throughput is network-bound, not backend-bound** — the ~2.4 pages/sec rate is limited by HTTP latency to ipfabric.io, not by queue operations.
+- **Single-worker throughput is network-bound, not backend-bound** — the ~2.4 pages/sec rate is limited by HTTP latency to example.com, not by queue operations.

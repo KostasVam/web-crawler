@@ -9,7 +9,7 @@ export interface Config {
 }
 
 const defaults: Config = {
-  seed: "https://ipfabric.io",
+  seed: "https://example.com",
   maxDepth: 2,
   concurrency: 5,
   mode: "memory",

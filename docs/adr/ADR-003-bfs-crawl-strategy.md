@@ -15,7 +15,7 @@ Use **BFS** traversal via a FIFO queue.
 ## Why BFS over DFS
 
 ```
-        ipfabric.io          ← depth 0
+        example.com          ← depth 0
        /     |      \
     /about  /blog  /products  ← depth 1
     |        |
@@ -24,8 +24,8 @@ Use **BFS** traversal via a FIFO queue.
            /blog/post-1/comments  ← depth 3
 ```
 
-**BFS visits**: ipfabric.io → /about → /blog → /products → /about/team → /blog/post-1 → ...
-**DFS visits**: ipfabric.io → /about → /about/team → (back) → /blog → /blog/post-1 → /blog/post-1/comments → ...
+**BFS visits**: example.com → /about → /blog → /products → /about/team → /blog/post-1 → ...
+**DFS visits**: example.com → /about → /about/team → (back) → /blog → /blog/post-1 → /blog/post-1/comments → ...
 
 | Criteria | BFS | DFS |
 |---|---|---|
